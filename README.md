@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # 💸 Grana em Ordem - Projeto em Laravel
 
 Este é um projeto de **aprendizado** desenvolvido com **Laravel** e **PHP**, que simula um sistema simples de **controle financeiro pessoal**. O objetivo é colocar em prática os conhecimentos adquiridos sobre Laravel e desenvolver uma aplicação funcional com cadastro e visualização de transações financeiras.
@@ -164,4 +163,3 @@ php artisan serve
 http://127.0.0.1:8000
 
 Você deverá ver a página inicial do Laravel, com os links para Log in e Register. Registre-se para começar a usar seu controlador de gastos!
->>>>>>> 9c5f877 (feat: Crud principal)
