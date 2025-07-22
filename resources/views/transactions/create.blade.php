@@ -12,6 +12,7 @@
                     <form method="POST" action="{{ route('transactions.store') }}">
                         @csrf
 
+                        <!-- Tipo de Transação -->
                         <div>
                             <x-input-label for="type" :value="__('Tipo')" />
                             <select id="type" name="type" class="block mt-1 w-full" required>
@@ -19,6 +20,20 @@
                                 <option value="income">{{ __('Receita') }}</option>
                             </select>
                             <x-input-error :messages="$errors->get('type')" class="mt-2" />
+                        </div>
+
+                        <!-- Categoria da Transação -->
+                        <div class="mt-4">
+                            <x-input-label for="category_id" :value="__('Categoria')" />
+                            <select id="category_id" name="category_id" class="block mt-1 w-full">
+                                <option value="">{{ __('Nenhuma Categoria') }}</option>
+                                @foreach ($categories as $category)
+                                    <option value="{{ $category->id }}" @selected(old('category_id') == $category->id)>
+                                        {{ $category->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            <x-input-error :messages="$errors->get('category_id')" class="mt-2" />
                         </div>
 
                         <div class="mt-4">

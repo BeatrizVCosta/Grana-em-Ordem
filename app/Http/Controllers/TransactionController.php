@@ -6,12 +6,10 @@ use App\Models\Transaction; // Importe o Model Transaction
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth; // Importe o Facade Auth
 use Illuminate\Validation\Rule;
+use App\Models\Category;
 
 class TransactionController extends Controller
 {
-    /**
-     * Exibe a lista de transações do usuário logado.
-     */
     public function index()
     {
         // Pega as transações do usuário logado, ordenadas pela mais recente
@@ -19,12 +17,10 @@ class TransactionController extends Controller
         return view('transactions.index', compact('transactions'));
     }
 
-    /**
-     * Exibe o formulário para criar uma nova transação.
-     */
     public function create()
     {
-        return view('transactions.create');
+        $categories = Auth::user()->categories()->orderBy('name')->get();
+        return view('transactions.create', compact('categories'));
     }
 
     public function store(Request $request)
@@ -34,7 +30,8 @@ class TransactionController extends Controller
             'amount' => 'required|numeric|min:0.01',
             'description' => 'required|string|max:255',
             'transaction_date' => 'required|date',
-            'type' => 'required|in:income,expense', // Deve ser 'income' ou 'expense'
+            'type' => 'required|in:income,expense',
+            'category_id' => 'nullable|exists:categories,id',
         ]);
 
         // Cria a transação associada ao usuário logado
@@ -45,12 +42,12 @@ class TransactionController extends Controller
     }
     public function edit(Transaction $transaction)
     {
-        // Garante que o usuário só pode editar as próprias transações
         if ($transaction->user_id !== Auth::id()) {
-            abort(403); // Acesso negado
+            abort(403);
         }
 
-        return view('transactions.edit', compact('transaction'));
+        $categories = Auth::user()->categories()->orderBy('name')->get();
+        return view('transactions.edit', compact('transaction', 'categories'));
     }
 
     public function update(Request $request, Transaction $transaction)
@@ -65,7 +62,8 @@ class TransactionController extends Controller
             'amount' => 'required|numeric|min:0.01',
             'description' => 'required|string|max:255',
             'transaction_date' => 'required|date',
-            'type' => ['required', Rule::in(['income', 'expense'])], // Validação para 'income' ou 'expense'
+            'type' => ['required', Rule::in(['income', 'expense'])],
+            'category_id' => 'nullable|exists:categories,id', 
         ]);
 
         $transaction->update($validated); // Atualiza a transação
