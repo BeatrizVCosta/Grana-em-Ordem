@@ -10,11 +10,45 @@ use App\Models\Category;
 
 class TransactionController extends Controller
 {
-    public function index()
+     public function index(Request $request) // Adicione Request $request aqui
     {
-        // Pega as transações do usuário logado, ordenadas pela mais recente
-        $transactions = Auth::user()->transactions()->latest()->get();
-        return view('transactions.index', compact('transactions'));
+        $user = Auth::user();
+        $query = $user->transactions()->latest(); // Começa com todas as transações do usuário, ordenadas pela mais recente
+
+        // --- Lógica de Filtragem ---
+
+        // Filtro por Tipo (income/expense)
+        if ($request->filled('type') && in_array($request->type, ['income', 'expense'])) {
+            $query->where('type', $request->type);
+        }
+
+        // Filtro por Categoria
+        if ($request->filled('category_id')) {
+            $query->where('category_id', $request->category_id);
+        }
+
+        // Filtro por Descrição (busca parcial)
+        if ($request->filled('description')) {
+            $query->where('description', 'like', '%' . $request->description . '%');
+        }
+
+        // Filtro por Período de Data (transaction_date)
+        if ($request->filled('start_date')) {
+            $query->whereDate('transaction_date', '>=', $request->start_date);
+        }
+        if ($request->filled('end_date')) {
+            $query->whereDate('transaction_date', '<=', $request->end_date);
+        }
+
+        $transactions = $query->get(); // Executa a consulta com os filtros aplicados
+
+        // Pega todas as categorias do usuário para popular o filtro na view
+        $categories = $user->categories()->orderBy('name')->get();
+
+        // Passa os filtros atuais de volta para a view para que os campos do formulário permaneçam preenchidos
+        $filters = $request->only(['type', 'category_id', 'description', 'start_date', 'end_date']);
+
+        return view('transactions.index', compact('transactions', 'categories', 'filters'));
     }
 
     public function create()
