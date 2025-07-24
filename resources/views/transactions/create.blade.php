@@ -19,7 +19,7 @@
                                 <option value="expense">{{ __('Despesa') }}</option>
                                 <option value="income">{{ __('Receita') }}</option>
                             </select>
-                            <x-input-error :messages="$errors->get('type')" class="mt-2" />
+                            <x-input-error :messages="$errors->get('type')" class="mt-2" /> 
                         </div>
 
                         <!-- Categoria da Transação -->
