@@ -14,7 +14,22 @@
                             <span class="block sm:inline">{{ session('success') }}</span>
                         </div>
                     @endif
-
+                    {{-- Bloco de Resumo de Saldo - MOVIDO PARA CIMA DA TABELA --}}
+                    <div class="mt-6 p-4 bg-gray-100 rounded-lg shadow mb-6">
+                        <p class="text-lg font-bold mb-2">
+                            {{ $areFiltersActive ? 'Resumo do Período Selecionado:' : 'Saldo Total:' }}
+                        </p>
+                        <p class="text-green-600">
+                            Total de Receitas: R$ {{ number_format($totalIncome, 2, ',', '.') }}
+                        </p>
+                        <p class="text-red-600">
+                            Total de Despesas: R$ {{ number_format($totalExpense, 2, ',', '.') }}
+                        </p>
+                        <p class="text-lg font-bold mt-2 @if($balance < 0) text-red-700 @else text-green-700 @endif">
+                            Saldo: R$ {{ number_format($balance, 2, ',', '.') }}
+                        </p>
+                    </div>
+                    {{-- Fim do Bloco de Resumo de Saldo --}}
                     {{-- Formulário de Filtro --}}
                     <form method="GET" action="{{ route('transactions.index') }}" class="mb-6 p-4 border rounded-lg bg-gray-50">
                         <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -75,23 +90,6 @@
                     <a href="{{ route('transactions.create') }}" class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150 mb-4">
                         {{ __('Adicionar Nova Transação') }}
                     </a>
-
-                    {{-- Bloco de Resumo de Saldo - MOVIDO PARA CIMA DA TABELA --}}
-                    <div class="mt-6 p-4 bg-gray-100 rounded-lg shadow mb-6">
-                        <p class="text-lg font-bold mb-2">
-                            {{ $areFiltersActive ? 'Resumo do Período Selecionado:' : 'Saldo Total:' }}
-                        </p>
-                        <p class="text-green-600">
-                            Total de Receitas: R$ {{ number_format($totalIncome, 2, ',', '.') }}
-                        </p>
-                        <p class="text-red-600">
-                            Total de Despesas: R$ {{ number_format($totalExpense, 2, ',', '.') }}
-                        </p>
-                        <p class="text-lg font-bold mt-2 @if($balance < 0) text-red-700 @else text-green-700 @endif">
-                            Saldo: R$ {{ number_format($balance, 2, ',', '.') }}
-                        </p>
-                    </div>
-                    {{-- Fim do Bloco de Resumo de Saldo --}}
 
                     @if ($transactions->isEmpty())
                         <p>Você ainda não tem transações registradas.</p>
