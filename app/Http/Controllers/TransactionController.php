@@ -9,7 +9,8 @@ use Illuminate\Validation\Rule;
 use App\Models\Category;
 
 class TransactionController extends Controller
-{public function index(Request $request)
+{
+    public function index(Request $request)
     {
         $user = Auth::user();
         $query = $user->transactions()->latest();
@@ -60,24 +61,33 @@ class TransactionController extends Controller
         $categories = Auth::user()->categories()->orderBy('name')->get();
         return view('transactions.create', compact('categories'));
     }
-
-    public function store(Request $request)
+ public function store(Request $request)
     {
-        // Validação dos dados do formulário
         $validated = $request->validate([
             'amount' => 'required|numeric|min:0.01',
             'description' => 'required|string|max:255',
             'transaction_date' => 'required|date',
             'type' => 'required|in:income,expense',
             'category_id' => 'nullable|exists:categories,id',
+        ], [ 
+            'amount.required' => 'O valor da transação é obrigatório.',
+            'amount.numeric' => 'O valor deve ser um número válido.',
+            'amount.min' => 'O valor deve ser maior que zero.',
+            'description.required' => 'A descrição da transação é obrigatória.',
+            'description.string' => 'A descrição deve ser um texto.',
+            'description.max' => 'A descrição não pode ter mais de :max caracteres.',
+            'transaction_date.required' => 'A data da transação é obrigatória.',
+            'transaction_date.date' => 'A data da transação deve ser uma data válida.',
+            'type.required' => 'O tipo da transação (receita ou despesa) é obrigatório.',
+            'type.in' => 'O tipo de transação deve ser receita ou despesa.',
+            'category_id.exists' => 'A categoria selecionada não é válida.',
         ]);
 
-        // Cria a transação associada ao usuário logado
         Auth::user()->transactions()->create($validated);
 
-        // Redireciona de volta para a lista de transações com uma mensagem de sucesso
         return redirect()->route('transactions.index')->with('success', 'Transação adicionada com sucesso!');
     }
+
     public function edit(Transaction $transaction)
     {
         if ($transaction->user_id !== Auth::id()) {
@@ -88,35 +98,44 @@ class TransactionController extends Controller
         return view('transactions.edit', compact('transaction', 'categories'));
     }
 
-    public function update(Request $request, Transaction $transaction)
+   public function update(Request $request, Transaction $transaction)
     {
-        // Garante que o usuário só pode atualizar as próprias transações
         if ($transaction->user_id !== Auth::id()) {
-            abort(403); // Acesso negado
+            abort(403);
         }
 
-        // Validação dos dados do formulário
         $validated = $request->validate([
             'amount' => 'required|numeric|min:0.01',
             'description' => 'required|string|max:255',
             'transaction_date' => 'required|date',
             'type' => ['required', Rule::in(['income', 'expense'])],
-            'category_id' => 'nullable|exists:categories,id', 
-        ]);
+            'category_id' => 'nullable|exists:categories,id',
+        ], [
+            'amount.required' => 'O valor da transação é obrigatório.',
+            'amount.numeric' => 'O valor deve ser um número válido.',
+            'amount.min' => 'O valor deve ser maior que zero.',
+            'description.required' => 'A descrição da transação é obrigatória.',
+            'description.string' => 'A descrição deve ser um texto.',
+            'description.max' => 'A descrição não pode ter mais de :max caracteres.',
+            'transaction_date.required' => 'A data da transação é obrigatória.',
+            'transaction_date.date' => 'A data da transação deve ser uma data válida.',
+            'type.required' => 'O tipo da transação (receita ou despesa) é obrigatório.',
+            'type.in' => 'O tipo de transação deve ser receita ou despesa.',
+            'category_id.exists' => 'A categoria selecionada não é válida.',
+        ]); 
 
-        $transaction->update($validated); // Atualiza a transação
+        $transaction->update($validated);
 
         return redirect()->route('transactions.index')->with('success', 'Transação atualizada com sucesso!');
     }
 
     public function destroy(Transaction $transaction)
     {
-        // Garante que o usuário só pode excluir as próprias transações
         if ($transaction->user_id !== Auth::id()) {
-            abort(403); // Acesso negado
+            abort(403);
         }
 
-        $transaction->delete(); // Exclui a transação
+        $transaction->delete();
 
         return redirect()->route('transactions.index')->with('success', 'Transação excluída com sucesso!');
     }
