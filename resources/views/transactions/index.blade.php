@@ -41,6 +41,12 @@
                                 </select>
                             </div>
 
+                            <!-- Filtro por Descrição -->
+                            <div>
+                                <x-input-label for="filter_description" :value="__('Descrição')" />
+                                <x-text-input id="filter_description" class="block mt-1 w-full" type="text" name="description" :value="$filters['description'] ?? ''" />
+                            </div>
+
                             <!-- Filtro por Data Inicial -->
                             <div>
                                 <x-input-label for="filter_start_date" :value="__('Data Inicial')" />
@@ -65,9 +71,27 @@
                     </form>
                     {{-- Fim do Formulário de Filtro --}}
 
+                    {{-- Botão Adicionar Nova Transação - MOVIDO PARA CIMA DA TABELA --}}
                     <a href="{{ route('transactions.create') }}" class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150 mb-4">
                         {{ __('Adicionar Nova Transação') }}
                     </a>
+
+                    {{-- Bloco de Resumo de Saldo - MOVIDO PARA CIMA DA TABELA --}}
+                    <div class="mt-6 p-4 bg-gray-100 rounded-lg shadow mb-6">
+                        <p class="text-lg font-bold mb-2">
+                            {{ $areFiltersActive ? 'Resumo do Período Selecionado:' : 'Saldo Total:' }}
+                        </p>
+                        <p class="text-green-600">
+                            Total de Receitas: R$ {{ number_format($totalIncome, 2, ',', '.') }}
+                        </p>
+                        <p class="text-red-600">
+                            Total de Despesas: R$ {{ number_format($totalExpense, 2, ',', '.') }}
+                        </p>
+                        <p class="text-lg font-bold mt-2 @if($balance < 0) text-red-700 @else text-green-700 @endif">
+                            Saldo: R$ {{ number_format($balance, 2, ',', '.') }}
+                        </p>
+                    </div>
+                    {{-- Fim do Bloco de Resumo de Saldo --}}
 
                     @if ($transactions->isEmpty())
                         <p>Você ainda não tem transações registradas.</p>
@@ -115,7 +139,7 @@
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                             <a href="{{ route('transactions.edit', $transaction) }}" class="text-indigo-600 hover:text-indigo-900">Editar</a>
-                                            
+
                                             <form action="{{ route('transactions.destroy', $transaction) }}" method="POST" class="inline ml-4">
                                                 @csrf
                                                 @method('DELETE')
@@ -126,12 +150,6 @@
                                 @endforeach
                             </tbody>
                         </table>
-
-                        <div class="mt-6 p-4 bg-gray-100 rounded-lg shadow">
-                            <p class="text-lg font-bold">
-                                Saldo Total: R$ {{ number_format($transactions->where('type', 'income')->sum('amount') - $transactions->where('type', 'expense')->sum('amount'), 2, ',', '.') }}
-                            </p>
-                        </div>
                     @endif
                 </div>
             </div>

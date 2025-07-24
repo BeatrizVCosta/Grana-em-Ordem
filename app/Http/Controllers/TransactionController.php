@@ -9,46 +9,50 @@ use Illuminate\Validation\Rule;
 use App\Models\Category;
 
 class TransactionController extends Controller
-{
-     public function index(Request $request) // Adicione Request $request aqui
+{public function index(Request $request)
     {
         $user = Auth::user();
-        $query = $user->transactions()->latest(); // Começa com todas as transações do usuário, ordenadas pela mais recente
+        $query = $user->transactions()->latest();
 
-        // --- Lógica de Filtragem ---
+        $areFiltersActive = false; 
 
-        // Filtro por Tipo (income/expense)
         if ($request->filled('type') && in_array($request->type, ['income', 'expense'])) {
             $query->where('type', $request->type);
+            $areFiltersActive = true;
         }
 
-        // Filtro por Categoria
         if ($request->filled('category_id')) {
             $query->where('category_id', $request->category_id);
+            $areFiltersActive = true;
         }
 
-        // Filtro por Descrição (busca parcial)
         if ($request->filled('description')) {
             $query->where('description', 'like', '%' . $request->description . '%');
+            $areFiltersActive = true;
         }
 
-        // Filtro por Período de Data (transaction_date)
         if ($request->filled('start_date')) {
             $query->whereDate('transaction_date', '>=', $request->start_date);
+            $areFiltersActive = true;
         }
         if ($request->filled('end_date')) {
             $query->whereDate('transaction_date', '<=', $request->end_date);
+            $areFiltersActive = true;
         }
 
-        $transactions = $query->get(); // Executa a consulta com os filtros aplicados
+        $transactions = $query->get();
 
-        // Pega todas as categorias do usuário para popular o filtro na view
+        // --- Cálculo dos Totais Filtrados ---
+        $totalIncome = $transactions->where('type', 'income')->sum('amount');
+        $totalExpense = $transactions->where('type', 'expense')->sum('amount');
+        $balance = $totalIncome - $totalExpense;
+
         $categories = $user->categories()->orderBy('name')->get();
 
-        // Passa os filtros atuais de volta para a view para que os campos do formulário permaneçam preenchidos
         $filters = $request->only(['type', 'category_id', 'description', 'start_date', 'end_date']);
 
-        return view('transactions.index', compact('transactions', 'categories', 'filters'));
+        // Passa a nova flag para a view
+        return view('transactions.index', compact('transactions', 'categories', 'filters', 'totalIncome', 'totalExpense', 'balance', 'areFiltersActive'));
     }
 
     public function create()
