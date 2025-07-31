@@ -14,29 +14,15 @@
                             <span class="block sm:inline">{{ session('success') }}</span>
                         </div>
                     @endif
-                    {{-- Bloco de Resumo de Saldo - MOVIDO PARA CIMA DA TABELA --}}
-                    <div class="mt-6 p-4 bg-gray-100 rounded-lg shadow mb-6">
-                        <p class="text-lg font-bold mb-2">
-                            {{ $areFiltersActive ? 'Resumo do Período Selecionado:' : 'Saldo Total:' }}
-                        </p>
-                        <p class="text-green-600">
-                            Total de Receitas: R$ {{ number_format($totalIncome, 2, ',', '.') }}
-                        </p>
-                        <p class="text-red-600">
-                            Total de Despesas: R$ {{ number_format($totalExpense, 2, ',', '.') }}
-                        </p>
-                        <p class="text-lg font-bold mt-2 @if($balance < 0) text-red-700 @else text-green-700 @endif">
-                            Saldo: R$ {{ number_format($balance, 2, ',', '.') }}
-                        </p>
-                    </div>
-                    {{-- Fim do Bloco de Resumo de Saldo --}}
-                    {{-- Formulário de Filtro --}}
+
+                    {{-- Formulário de Filtro - MAIS ORGANIZADO EM UMA LINHA --}}
                     <form method="GET" action="{{ route('transactions.index') }}" class="mb-6 p-4 border rounded-lg bg-gray-50">
-                        <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                        {{-- Usamos flexbox para manter os itens em linha e flex-wrap para quebrarem se necessário --}}
+                        <div class="flex flex-wrap items-end gap-4">
                             <!-- Filtro por Tipo -->
-                            <div>
-                                <x-input-label for="filter_type" :value="__('Tipo')" />
-                                <select id="filter_type" name="type" class="block mt-1 w-full rounded-md shadow-sm border-gray-300 focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                            <div class="flex-grow"> {{-- flex-grow permite que o item cresça --}}
+                                <label for="filter_type" class="block mb-2 text-sm font-medium text-gray-900">{{ __('Tipo') }}</label>
+                                <select id="filter_type" name="type" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
                                     <option value="">{{ __('Todos') }}</option>
                                     <option value="income" @selected(isset($filters['type']) && $filters['type'] === 'income')>{{ __('Receita') }}</option>
                                     <option value="expense" @selected(isset($filters['type']) && $filters['type'] === 'expense')>{{ __('Despesa') }}</option>
@@ -44,9 +30,9 @@
                             </div>
 
                             <!-- Filtro por Categoria -->
-                            <div>
-                                <x-input-label for="filter_category" :value="__('Categoria')" />
-                                <select id="filter_category" name="category_id" class="block mt-1 w-full rounded-md shadow-sm border-gray-300 focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                            <div class="flex-grow">
+                                <label for="filter_category" class="block mb-2 text-sm font-medium text-gray-900">{{ __('Categoria') }}</label>
+                                <select id="filter_category" name="category_id" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
                                     <option value="">{{ __('Todas') }}</option>
                                     @foreach ($categories as $category)
                                         <option value="{{ $category->id }}" @selected(isset($filters['category_id']) && $filters['category_id'] == $category->id)>
@@ -57,104 +43,122 @@
                             </div>
 
                             <!-- Filtro por Descrição -->
-                            <div>
-                                <x-input-label for="filter_description" :value="__('Descrição')" />
-                                <x-text-input id="filter_description" class="block mt-1 w-full" type="text" name="description" :value="$filters['description'] ?? ''" />
+                            <div class="flex-grow">
+                                <label for="filter_description" class="block mb-2 text-sm font-medium text-gray-900">{{ __('Descrição') }}</label>
+                                <input type="text" id="filter_description" name="description" value="{{ $filters['description'] ?? '' }}" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" />
                             </div>
 
                             <!-- Filtro por Data Inicial -->
-                            <div>
-                                <x-input-label for="filter_start_date" :value="__('Data Inicial')" />
-                                <x-text-input id="filter_start_date" class="block mt-1 w-full" type="date" name="start_date" :value="$filters['start_date'] ?? ''" />
+                            <div class="flex-grow">
+                                <label for="filter_start_date" class="block mb-2 text-sm font-medium text-gray-900">{{ __('Data Inicial') }}</label>
+                                <input type="date" id="filter_start_date" name="start_date" value="{{ $filters['start_date'] ?? '' }}" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" />
                             </div>
 
                             <!-- Filtro por Data Final -->
-                            <div>
-                                <x-input-label for="filter_end_date" :value="__('Data Final')" />
-                                <x-text-input id="filter_end_date" class="block mt-1 w-full" type="date" name="end_date" :value="$filters['end_date'] ?? ''" />
+                            <div class="flex-grow">
+                                <label for="filter_end_date" class="block mb-2 text-sm font-medium text-gray-900">{{ __('Data Final') }}</label>
+                                <input type="date" id="filter_end_date" name="end_date" value="{{ $filters['end_date'] ?? '' }}" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" />
                             </div>
-                        </div>
 
-                        <div class="flex items-center justify-end mt-4">
-                            <x-primary-button class="ml-4">
-                                {{ __('Aplicar Filtros') }}
-                            </x-primary-button>
-                            <a href="{{ route('transactions.index') }}" class="ml-4 inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-25 transition ease-in-out duration-150">
-                                {{ __('Limpar Filtros') }}
-                            </a>
+                            {{-- Botões de Ação do Filtro - Alinhados na mesma linha --}}
+                            <div class="flex gap-2 mt-auto"> {{-- mt-auto alinha os botões com a base dos inputs --}}
+                                <button type="submit" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 focus:outline-none">
+                                    {{ __('Aplicar Filtros') }}
+                                </button>
+                                <a href="{{ route('transactions.index') }}" class="text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-5 py-2.5">
+                                    {{ __('Limpar Filtros') }}
+                                </a>
+                            </div>
                         </div>
                     </form>
                     {{-- Fim do Formulário de Filtro --}}
 
-                    {{-- Botão Adicionar Nova Transação - MOVIDO PARA CIMA DA TABELA --}}
-                   <div class="flex items-center justify-between mb-4">
-                        <a href="{{ route('transactions.create') }}" class="focus:outline-none text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                    {{-- Bloco de Resumo de Saldo - MAIS BONITO --}}
+                    <div class="mt-6 p-5 bg-white border-l-4 border-blue-500 rounded-lg shadow-md mb-6"> {{-- p-5 para mais espaço, border-l-4 para destaque, shadow-md --}}
+                        <p class="text-lg font-bold mb-2 text-gray-800"> {{-- text-gray-800 para contraste --}}
+                            {{ $areFiltersActive ? 'Resumo do Período Selecionado:' : 'Saldo Total:' }}
+                        </p>
+                        <p class="text-green-600 text-base"> {{-- text-base para padronizar --}}
+                            Total de Receitas: <span class="font-semibold">R$ {{ number_format($totalIncome, 2, ',', '.') }}</span>
+                        </p>
+                        <p class="text-red-600 text-base"> {{-- text-base para padronizar --}}
+                            Total de Despesas: <span class="font-semibold">R$ {{ number_format($totalExpense, 2, ',', '.') }}</span>
+                        </p>
+                        <p class="text-xl font-extrabold mt-3 @if($balance < 0) text-red-700 @else text-green-700 @endif"> {{-- text-xl e font-extrabold para destaque --}}
+                            Saldo: R$ {{ number_format($balance, 2, ',', '.') }}
+                        </p>
+                    </div>
+                    {{-- Fim do Bloco de Resumo de Saldo --}}
+                    <div class="flex items-center justify-between mb-4">
+                        <a href="{{ route('transactions.create') }}" class="focus:outline-none text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2">
                             {{ __('Adicionar Nova Transação') }}
                         </a>
 
-                        {{-- Botão de Exportar --}}
-                        <a href="{{ route('transactions.export', request()->query()) }}" class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-25 transition ease-in-out duration-150">
+                        {{-- Botão de Exportar - AGORA COM LETRAS VERDES --}}
+                        <a href="{{ route('transactions.export', request()->query()) }}" class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-md font-semibold text-xs text-green-700 uppercase tracking-widest shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-25 transition ease-in-out duration-150">
                             {{ __('Exportar (Excel)') }}
                         </a>
                     </div>
-
                     @if ($transactions->isEmpty())
-                        <p>Você ainda não tem transações registradas.</p>
+                        <p class="text-center text-gray-600">Você ainda não tem transações registradas.</p>
                     @else
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-50">
-                                <tr>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Data
-                                    </th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Descrição
-                                    </th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Valor
-                                    </th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Tipo
-                                    </th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Categoria
-                                    </th>
-                                    <th scope="col" class="relative px-6 py-3">
-                                        <span class="sr-only">Ações</span>
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody class="bg-white divide-y divide-gray-200">
-                                @foreach ($transactions as $transaction)
+                        {{-- Tabela de Transações --}}
+                        <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
+                            <table class="w-full text-sm text-left rtl:text-right text-gray-500">
+                                <thead class="text-xs text-gray-700 uppercase bg-gray-50">
                                     <tr>
-                                        <td class="px-6 py-4 whitespace-nowrap">
-                                            {{ $transaction->transaction_date->format('d/m/Y') }}
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap">
-                                            {{ $transaction->description }}
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap @if($transaction->type === 'expense') text-red-600 @else text-green-600 @endif">
-                                            {{ $transaction->type === 'expense' ? '-' : '' }}R$ {{ number_format($transaction->amount, 2, ',', '.') }}
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap">
-                                            {{ $transaction->type === 'income' ? 'Receita' : 'Despesa' }}
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap">
-                                            {{ $transaction->category->name ?? 'N/A' }}
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                            <a href="{{ route('transactions.edit', $transaction) }}" class="text-indigo-600 hover:text-indigo-900">Editar</a>
-
-                                            <form action="{{ route('transactions.destroy', $transaction) }}" method="POST" class="inline ml-4">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="text-red-600 hover:text-red-900" onclick="return confirm('Tem certeza que deseja excluir esta transação?');">Excluir</button>
-                                            </form>
-                                        </td>
+                                        <th scope="col" class="px-6 py-3">
+                                            Data
+                                        </th>
+                                        <th scope="col" class="px-6 py-3">
+                                            Descrição
+                                        </th>
+                                        <th scope="col" class="px-6 py-3">
+                                            Valor
+                                        </th>
+                                        <th scope="col" class="px-6 py-3">
+                                            Tipo
+                                        </th>
+                                        <th scope="col" class="px-6 py-3">
+                                            Categoria
+                                        </th>
+                                        <th scope="col" class="px-6 py-3">
+                                            Ações
+                                        </th>
                                     </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody>
+                                    @foreach ($transactions as $transaction)
+                                        <tr class="bg-white border-b hover:bg-gray-50">
+                                            <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
+                                                {{ $transaction->transaction_date->format('d/m/Y') }}
+                                            </td>
+                                            <td class="px-6 py-4">
+                                                {{ $transaction->description }}
+                                            </td>
+                                            <td class="px-6 py-4 @if($transaction->type === 'expense') text-red-600 @else text-green-600 @endif">
+                                                {{ $transaction->type === 'expense' ? '-' : '' }}R$ {{ number_format($transaction->amount, 2, ',', '.') }}
+                                            </td>
+                                            <td class="px-6 py-4">
+                                                {{ $transaction->type === 'income' ? 'Receita' : 'Despesa' }}
+                                            </td>
+                                            <td class="px-6 py-4">
+                                                {{ $transaction->category->name ?? 'N/A' }}
+                                            </td>
+                                            <td class="px-6 py-4 text-right">
+                                                <a href="{{ route('transactions.edit', $transaction) }}" class="font-medium text-blue-600 hover:underline">Editar</a>
+
+                                                <form action="{{ route('transactions.destroy', $transaction) }}" method="POST" class="inline ml-4">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="font-medium text-red-600 hover:underline" onclick="return confirm('Tem certeza que deseja excluir esta transação?');">Excluir</button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
                     @endif
                 </div>
             </div>
